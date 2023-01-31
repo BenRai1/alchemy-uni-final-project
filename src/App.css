@@ -59,3 +59,13 @@ img.react:hover {
     height: 6em;
     padding: 1.5em;
 }
+.checkboxesContainer {
+    display: flex;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    /* border: red solid 1px; */
+}
+
+.checkbox {
+    width: 8em;
+}
