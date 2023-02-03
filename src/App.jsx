@@ -1,15 +1,47 @@
 import { useState } from "react"
 import { Configuration, OpenAIApi } from "openai"
 import { Option } from "../components/Option"
-import { create } from "ipfs-http-client"
+import { create, urlSource } from "ipfs-http-client"
 import { Buffer } from "buffer"
-import base64 from "./base64"
+import base64Example from "./base64"
 import "./App.css"
 
-const key = import.meta.env.VITE_OPENAI_API_KEY
+// import { Moralis } from "@moralisweb3"
+// const Moralis = require("moralis").default
+// import fs from "fs"
+
+const openAIKey = import.meta.env.VITE_OPENAI_API_KEY
+const projectIdInfuria = import.meta.env.VITE_INFURA_PORJECT_ID
+const apiKeySecretInfuria = import.meta.env.VITE_INFURA_API_KEY_SECRET
+const projectIdFilebase = import.meta.env.VITE_FILEBASE_PORJECT_ID
+const apiKeySecretFilebase = import.meta.env.VITE_FILEBASE_API_KEY_SECRET
+
+const authInfuria =
+    "Basic " + Buffer.from(projectIdInfuria + ":" + apiKeySecretInfuria).toString("base64")
+
+const ipfs = new create({
+    host: "ipfs.infura.io",
+    port: 5001,
+    protocol: "https",
+    headers: {
+        authorization: authInfuria,
+    },
+})
+
+// https://ipfs.infura.io/ipfs/QmNkGQWQo7oxKUUpTvse9rEjzrjdWDAQMqzAmfRTGjSXCZ
+
+//https://ipfs.infura-ipfs.io/ipfs/QmNkGQWQo7oxKUUpTvse9rEjzrjdWDAQMqzAmfRTGjSXCZ
+// https://ipfs.infura.io:5001/api/v0/cat?arg=QmNkGQWQo7oxKUUpTvse9rEjzrjdWDAQMqzAmfRTGjSXCZ
+// https://final-project-au.infura-ipfs.io/ipfs/QmNkGQWQo7oxKUUpTvse9rEjzrjdWDAQMqzAmfRTGjSXCZ
+
+// const moralisKey = import.meta.env.VITE_MORALIS_API_KEY
+
+// await Moralis.start({
+//     apiKey: moralisKey,
+// })
 
 const configuration = new Configuration({
-    apiKey: key,
+    apiKey: openAIKey,
 })
 const openai = new OpenAIApi(configuration)
 
@@ -17,7 +49,7 @@ function App() {
     // todo: State zusammenfassen und ein Array machen für links und Base64(??)
 
     const [imageLink1, setimageLink1] = useState(
-        "https://i.seadn.io/gcs/files/4f82aecc2591d4f79e18cabb34c620b6.png?auto=format&w=1000"
+        "https://i.seadn.io/gcs/files/45aefae563f35937711b6a95f70110e6.png?auto=format&w=1000"
     )
     const [imageLink2, setimageLink2] = useState(
         "https://i.seadn.io/gcs/files/1089ca3f2fe5e9c4f32537077ee8feb0.png?auto=format&w=1000"
@@ -33,7 +65,7 @@ function App() {
     const [base64_3, setBase64_3] = useState("")
     const [base64_4, setBase64_4] = useState("")
 
-    const [chosenBase64, setChosenBase64] = useState(base64)
+    const [chosenBase64, setChosenBase64] = useState(base64Example)
     const [chosenPicture, setChosenPicture] = useState("")
     let optionsArray = [
         { name: "small", clicked: false },
@@ -87,39 +119,24 @@ function App() {
     }
 
     const mint = async () => {
-        console.log(chosenBase64)
+        // WORKING BUT NO CID
+        // const file = await ipfs.add(
+        //     urlSource(
+        //         "https://i.seadn.io/gcs/files/4f82aecc2591d4f79e18cabb34c620b6.png?auto=format&w=1000"
+        //     )
+        // )
+        // console.log(file)
+        // console.log(file.cid.multihash)
 
-        const ipfs = new create({ host: "ipfs.infura.io", port: 5001, protocol: "https" })
+        // console.log(chosenBase64)
 
         // transforme the base64 data to data readable for to ipfs api
         const buffer = Buffer.from(chosenBase64, "base64")
 
-        ipfs.add(buffer, (error, result) => {
-            if (error) {
-                console.error(error)
-                return
-            }
-            console.log("Hash of the image on Ipfs", result[0].hash)
-        })
-
-        // ----------------------------------------------------------------------------
-        // const image = document.getElementById("image1")
-        // // Get the remote image as a Blob with the fetch API
-        // fetch(image.src)
-        //     .then((res) => res.blob())
-        //     .then((blob) => {
-        //         // Read the Blob as DataURL using the FileReader API
-        //         const reader = new FileReader()
-        //         reader.onloadend = () => {
-        //             console.log(reader.result)
-        //             // Logs data:image/jpeg;base64,wL2dvYWwgbW9yZ...
-        //             // Convert to Base64 string
-        //             const base64 = getBase64StringFromDataURL(reader.result)
-        //             console.log(base64)
-        //             // Logs wL2dvYWwgbW9yZ...
-        //         }
-        //         reader.readAsDataURL(blob)
-        //     })
+        ipfs.add(buffer).then((result) =>
+            console.log("https://final-project-au.infura-ipfs.io/ipfs/" + result.path)
+        )
+        console.log("End of Function")
     }
 
     return (
