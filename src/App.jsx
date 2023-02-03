@@ -1,32 +1,13 @@
 import { useState } from "react"
 import { Configuration, OpenAIApi } from "openai"
-import { Option } from "../components/Option"
-import { create, urlSource } from "ipfs-http-client"
+import { Option } from "./components/Option"
 import { Buffer } from "buffer"
-import base64Example from "./base64"
+import base64Example from "./components/base64"
+import ipfs from "./components/ipfs"
+import createMetadataAndUplodeIt from "./components/CreatMetadata"
 import "./App.css"
 
-// import { Moralis } from "@moralisweb3"
-// const Moralis = require("moralis").default
-// import fs from "fs"
-
 const openAIKey = import.meta.env.VITE_OPENAI_API_KEY
-const projectIdInfuria = import.meta.env.VITE_INFURA_PORJECT_ID
-const apiKeySecretInfuria = import.meta.env.VITE_INFURA_API_KEY_SECRET
-const projectIdFilebase = import.meta.env.VITE_FILEBASE_PORJECT_ID
-const apiKeySecretFilebase = import.meta.env.VITE_FILEBASE_API_KEY_SECRET
-
-const authInfuria =
-    "Basic " + Buffer.from(projectIdInfuria + ":" + apiKeySecretInfuria).toString("base64")
-
-const ipfs = new create({
-    host: "ipfs.infura.io",
-    port: 5001,
-    protocol: "https",
-    headers: {
-        authorization: authInfuria,
-    },
-})
 
 // https://ipfs.infura.io/ipfs/QmNkGQWQo7oxKUUpTvse9rEjzrjdWDAQMqzAmfRTGjSXCZ
 
@@ -34,18 +15,14 @@ const ipfs = new create({
 // https://ipfs.infura.io:5001/api/v0/cat?arg=QmNkGQWQo7oxKUUpTvse9rEjzrjdWDAQMqzAmfRTGjSXCZ
 // https://final-project-au.infura-ipfs.io/ipfs/QmNkGQWQo7oxKUUpTvse9rEjzrjdWDAQMqzAmfRTGjSXCZ
 
-// const moralisKey = import.meta.env.VITE_MORALIS_API_KEY
-
-// await Moralis.start({
-//     apiKey: moralisKey,
-// })
-
 const configuration = new Configuration({
     apiKey: openAIKey,
 })
 const openai = new OpenAIApi(configuration)
 
 function App() {
+    const dedicatedGatewayInfuria = "final-project-au"
+
     // todo: State zusammenfassen und ein Array machen für links und Base64(??)
 
     const [imageLink1, setimageLink1] = useState(
@@ -80,7 +57,7 @@ function App() {
         "https://t3.ftcdn.net/jpg/01/91/95/30/360_F_191953033_gehQATeDoh5z6PyRDbeKyBZuS83CjMEF.jpg"
 
     const generateImage = async () => {
-        let prompt = "A hors with"
+        let prompt = "A horse with"
         for (let i = 0; i < optionsArray.length; i++) {
             if (optionsArray[i].clicked == true) {
                 prompt = prompt + " " + optionsArray[i].name
@@ -119,24 +96,17 @@ function App() {
     }
 
     const mint = async () => {
-        // WORKING BUT NO CID
-        // const file = await ipfs.add(
-        //     urlSource(
-        //         "https://i.seadn.io/gcs/files/4f82aecc2591d4f79e18cabb34c620b6.png?auto=format&w=1000"
-        //     )
-        // )
-        // console.log(file)
-        // console.log(file.cid.multihash)
-
-        // console.log(chosenBase64)
-
         // transforme the base64 data to data readable for to ipfs api
+        let imageLink
         const buffer = Buffer.from(chosenBase64, "base64")
 
-        ipfs.add(buffer).then((result) =>
-            console.log("https://final-project-au.infura-ipfs.io/ipfs/" + result.path)
-        )
-        console.log("End of Function")
+        ipfs.add(buffer).then((result) => {
+            imageLink = `https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${result.path}`
+            console.log(imageLink)
+            const metadataCid = createMetadataAndUplodeIt(imageLink)
+        })
+
+        // console.log(`https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${metadataCid}`)
     }
 
     return (
