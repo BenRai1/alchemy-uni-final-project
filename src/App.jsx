@@ -68,19 +68,19 @@ function App() {
     const [chosenBase64, setChosenBase64] = useState(base64Example)
     const [chosenPicture, setChosenPicture] = useState("")
     let optionsArray = [
-        { name: "small", clicked: false },
+        { name: "green", clicked: false },
+        { name: "house", clicked: false },
         { name: "black", clicked: false },
-        { name: "scarf", clicked: false },
-        { name: "monocal", clicked: false },
-        { name: "green cloud", clicked: false },
-        { name: "happy", clicked: false },
+        { name: "clouds", clicked: false },
+        { name: "yellow", clicked: false },
+        { name: "cat", clicked: false },
     ]
 
     const alt =
         "https://t3.ftcdn.net/jpg/01/91/95/30/360_F_191953033_gehQATeDoh5z6PyRDbeKyBZuS83CjMEF.jpg"
 
     const generateImage = async () => {
-        let prompt = "A dog with"
+        let prompt = "A hors with"
         for (let i = 0; i < optionsArray.length; i++) {
             if (optionsArray[i].clicked == true) {
                 prompt = prompt + " " + optionsArray[i].name
