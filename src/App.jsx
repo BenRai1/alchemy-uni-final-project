@@ -4,7 +4,7 @@ import { Option } from "./components/Option"
 import { Buffer } from "buffer"
 import base64Example from "./components/base64"
 import ipfs from "./components/ipfs"
-import createMetadataAndUplodeIt from "./components/CreatMetadata"
+import createMetadata from "./components/CreatMetadata"
 import "./App.css"
 
 const openAIKey = import.meta.env.VITE_OPENAI_API_KEY
@@ -102,8 +102,13 @@ function App() {
 
         ipfs.add(buffer).then((result) => {
             imageLink = `https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${result.path}`
-            console.log(imageLink)
-            const metadataCid = createMetadataAndUplodeIt(imageLink)
+            // imageLink = "https://final-project-au.infura-ipfs.io/ipfs/QmRuiAezX2vuGTG5mRbYwkxUFY5kHk2NYewFUNs1B6mWVG"
+            console.log("image Link :", imageLink)
+            const metadata = createMetadata(imageLink, 1)
+            ipfs.add(metadata).then((result) => {
+                const linkToMetatdata = `https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${result.path}`
+                console.log("Link to metadata: ", linkToMetatdata)
+            })
         })
 
         // console.log(`https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${metadataCid}`)
