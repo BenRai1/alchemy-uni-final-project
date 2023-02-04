@@ -5,9 +5,16 @@ import { Buffer } from "buffer"
 import base64Example from "./components/base64"
 import ipfs from "./components/ipfs"
 import createMetadata from "./components/CreatMetadata"
+import AiNft from "./utils/AiNft.json"
 import "./App.css"
+// import { ethers } from "ethers"
+
+// import { ConnectWallet } from "@thirdweb-dev/react"
+// import { connectToContract } from "./components/HelpingFunctions"
 
 const openAIKey = import.meta.env.VITE_OPENAI_API_KEY
+// const CONTRACT_ADDRESS_AINFT = "0x299bc06715DaBadb915085522daeFc5b8627539C"
+// const aiNftContract = connectToContract(CONTRACT_ADDRESS_AINFT, AiNft.abi)
 
 // https://ipfs.infura.io/ipfs/QmNkGQWQo7oxKUUpTvse9rEjzrjdWDAQMqzAmfRTGjSXCZ
 
@@ -45,19 +52,19 @@ function App() {
     const [chosenBase64, setChosenBase64] = useState(base64Example)
     const [chosenPicture, setChosenPicture] = useState("")
     let optionsArray = [
-        { name: "green eyes", clicked: false },
-        { name: "black house", clicked: false },
-        { name: "horse", clicked: false },
-        { name: "grass", clicked: false },
-        { name: "tree", clicked: false },
-        { name: "big", clicked: false },
+        { name: "cat", clicked: false },
+        { name: "dog", clicked: false },
+        { name: "eagle", clicked: false },
+        { name: "made out of fire", clicked: false },
+        { name: "made out of wather", clicked: false },
+        { name: "made out of lightining", clicked: false },
     ]
 
     const alt =
         "https://t3.ftcdn.net/jpg/01/91/95/30/360_F_191953033_gehQATeDoh5z6PyRDbeKyBZuS83CjMEF.jpg"
 
     const generateImage = async () => {
-        let prompt = "A cat with"
+        let prompt = "A realistic photographic close up of a"
         for (let i = 0; i < optionsArray.length; i++) {
             if (optionsArray[i].clicked == true) {
                 prompt = prompt + " " + optionsArray[i].name
@@ -116,6 +123,7 @@ function App() {
 
     return (
         <div className="App">
+            {/* <ConnectWallet accentColor="#f213a4" colorMode="dark" /> */}
             <h1>Final project</h1>
             <h2>Chose up to 4 attributes</h2>
             <div className="checkboxesContainer">
