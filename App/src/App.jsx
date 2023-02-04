@@ -13,7 +13,7 @@ const openAIKey = import.meta.env.VITE_OPENAI_API_KEY
 
 //https://ipfs.infura-ipfs.io/ipfs/QmNkGQWQo7oxKUUpTvse9rEjzrjdWDAQMqzAmfRTGjSXCZ
 // https://ipfs.infura.io:5001/api/v0/cat?arg=QmNkGQWQo7oxKUUpTvse9rEjzrjdWDAQMqzAmfRTGjSXCZ
-// https://final-project-au.infura-ipfs.io/ipfs/QmNkGQWQo7oxKUUpTvse9rEjzrjdWDAQMqzAmfRTGjSXCZ
+// https://final-project-au.infura-ipfs.io/ipfs/QmbDLofw6tv5j5xMwJsY99x5UxFMMyKrrSrGm8CZVyBJYM
 
 const configuration = new Configuration({
     apiKey: openAIKey,
@@ -45,19 +45,19 @@ function App() {
     const [chosenBase64, setChosenBase64] = useState(base64Example)
     const [chosenPicture, setChosenPicture] = useState("")
     let optionsArray = [
-        { name: "green", clicked: false },
-        { name: "house", clicked: false },
-        { name: "black", clicked: false },
-        { name: "clouds", clicked: false },
-        { name: "yellow", clicked: false },
-        { name: "cat", clicked: false },
+        { name: "green eyes", clicked: false },
+        { name: "black house", clicked: false },
+        { name: "horse", clicked: false },
+        { name: "grass", clicked: false },
+        { name: "tree", clicked: false },
+        { name: "big", clicked: false },
     ]
 
     const alt =
         "https://t3.ftcdn.net/jpg/01/91/95/30/360_F_191953033_gehQATeDoh5z6PyRDbeKyBZuS83CjMEF.jpg"
 
     const generateImage = async () => {
-        let prompt = "A horse with"
+        let prompt = "A cat with"
         for (let i = 0; i < optionsArray.length; i++) {
             if (optionsArray[i].clicked == true) {
                 prompt = prompt + " " + optionsArray[i].name
