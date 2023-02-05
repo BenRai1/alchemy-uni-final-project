@@ -1,5 +1,5 @@
-// import { ethers } from "ethers"
-// const { ethereum } = window
+import { ethers } from "ethers"
+const { ethereum } = window
 
 // const setupEventListener = (contractAddress, abi, eventName) => {
 //     try {
@@ -22,11 +22,12 @@
 //     }
 // }
 
-// const connectToContract = (contractAddress, abi) => {
-//     const provider = new ethers.providers.Web3Provider(ethereum)
-//     const signer = provider.getSigner()
-//     let contract = new ethers.Contract(contractAddress, abi, signer)
-//     return contract
-// }
+const connectToContract = (contractAddress, abi) => {
+    const provider = new ethers.providers.Web3Provider(ethereum)
+    const signer = provider.getSigner()
+    let contract = new ethers.Contract(contractAddress, abi, signer)
+
+    return contract
+}
 
 export { connectToContract }

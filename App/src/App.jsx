@@ -1,20 +1,21 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Configuration, OpenAIApi } from "openai"
 import { Option } from "./components/Option"
 import { Buffer } from "buffer"
 import base64Example from "./components/base64"
 import ipfs from "./components/ipfs"
 import createMetadata from "./components/CreatMetadata"
+import { Button } from "@chakra-ui/react"
+
 import AiNft from "./utils/AiNft.json"
 import "./App.css"
-// import { ethers } from "ethers"
+import { ethers } from "ethers"
 
-// import { ConnectWallet } from "@thirdweb-dev/react"
-// import { connectToContract } from "./components/HelpingFunctions"
+import { connectToContract } from "./components/HelpingFunctions"
 
 const openAIKey = import.meta.env.VITE_OPENAI_API_KEY
-// const CONTRACT_ADDRESS_AINFT = "0x299bc06715DaBadb915085522daeFc5b8627539C"
-// const aiNftContract = connectToContract(CONTRACT_ADDRESS_AINFT, AiNft.abi)
+const CONTRACT_ADDRESS_AINFT = "0x299bc06715DaBadb915085522daeFc5b8627539C"
+const aiNftContract = connectToContract(CONTRACT_ADDRESS_AINFT, AiNft.abi)
 
 // https://ipfs.infura.io/ipfs/QmNkGQWQo7oxKUUpTvse9rEjzrjdWDAQMqzAmfRTGjSXCZ
 
@@ -51,6 +52,8 @@ function App() {
 
     const [chosenBase64, setChosenBase64] = useState(base64Example)
     const [chosenPicture, setChosenPicture] = useState("")
+    const [currentAccount, setCurrentAccount] = useState("")
+    const [onGoerli, setOnGoerli] = useState(false)
     let optionsArray = [
         { name: "cat", clicked: false },
         { name: "dog", clicked: false },
@@ -102,6 +105,47 @@ function App() {
         console.log(chosenPicture)
     }
 
+    const checkIfWalletIsConnected = async () => {
+        const { ethereum } = window
+        if (!ethereum) {
+            console.log("Make sure you have metamask!")
+            return
+        } else {
+            // console.log("We have the ethereum object", ethereum)
+        }
+        const accounts = await ethereum.request({ method: "eth_accounts" })
+        const chainId = await ethereum.request({ method: "eth_chainId" })
+        const goerliChaiId = "0x5"
+        if (chainId !== goerliChaiId) {
+            alert("You are not not the Goerli Test Network")
+            setOnGoerli(false)
+        } else {
+            setOnGoerli(true)
+        }
+        if (accounts.length !== 0) {
+            const account = accounts[0]
+            // console.log("Found an authorized account: ", account)
+            setCurrentAccount(account)
+        } else {
+            console.log("No autorized account found")
+        }
+    }
+
+    const connectWallet = async () => {
+        try {
+            const { ethereum } = window
+            if (!ethereum) {
+                console.log("Get Metamask")
+                return
+            }
+            const accounts = await ethereum.request({ method: "eth_requestAccounts" })
+            console.log("Connected ", accounts[0])
+            setCurrentAccount(accounts[0])
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     const mint = async () => {
         // transforme the base64 data to data readable for to ipfs api
         let imageLink
@@ -121,9 +165,32 @@ function App() {
         // console.log(`https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${metadataCid}`)
     }
 
+    const getInfo = async () => {
+        // await aiNftContract.setTotalSupply(4)
+        const max = await aiNftContract.max_supply()
+        console.log("max", max)
+    }
+
+    useEffect(() => {
+        checkIfWalletIsConnected()
+    }, [])
+
     return (
         <div className="App">
-            {/* <ConnectWallet accentColor="#f213a4" colorMode="dark" /> */}
+            {currentAccount === "" ? (
+                <Button colorScheme="blue" onClick={connectWallet}>
+                    Connect Wallet
+                </Button>
+            ) : !onGoerli ? (
+                <div>You are not on the Goerli Testnet, please change the Network</div>
+            ) : (
+                <div>
+                    <Button colorScheme="blue">Wallet is connected</Button>
+                    <Button colorScheme="blue" onClick={getInfo}>
+                        Get Info
+                    </Button>
+                </div>
+            )}
             <h1>Final project</h1>
             <h2>Chose up to 4 attributes</h2>
             <div className="checkboxesContainer">
