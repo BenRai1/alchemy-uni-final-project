@@ -5,15 +5,17 @@ import { Buffer } from "buffer";
 import base64Example from "./components/base64";
 import ipfs from "./components/ipfs";
 import createMetadata from "./components/CreatMetadata";
-import AiNft from "./utils/AiNft.json";
+// import AiNft from "./utils/AiNft.json";
 import "./App.css";
 import { ConnectWallet } from "@thirdweb-dev/react";
 // import { ethers } from "ethers"
 
 // import { ConnectWallet } from "@thirdweb-dev/react"
 // import { connectToContract } from "./components/HelpingFunctions"
+require("dotenv").config();
 
-const openAIKey = process.env.VITE_OPENAI_API_KEY;
+const openAIKey = process.env.OPENAI_API_KEY;
+console.log("openAIKey", openAIKey);
 // const CONTRACT_ADDRESS_AINFT = "0x299bc06715DaBadb915085522daeFc5b8627539C"
 // const aiNftContract = connectToContract(CONTRACT_ADDRESS_AINFT, AiNft.abi)
 
@@ -65,9 +67,11 @@ function App() {
     "https://t3.ftcdn.net/jpg/01/91/95/30/360_F_191953033_gehQATeDoh5z6PyRDbeKyBZuS83CjMEF.jpg";
 
   const generateImage = async () => {
+    console.log("openAIKey", openAIKey);
+
     let prompt = "A realistic photographic close up of a";
     for (let i = 0; i < optionsArray.length; i++) {
-      if (optionsArray[i].clicked == true) {
+      if (optionsArray[i].clicked === true) {
         prompt = prompt + " " + optionsArray[i].name;
       }
     }
@@ -157,7 +161,7 @@ function App() {
         </div>
         <div className="suggestionContainer">
           <img
-            className={chosenPicture == "2" ? "imageChosen" : "img"}
+            className={chosenPicture === "2" ? "imageChosen" : "img"}
             src={imageLink2}
             alt={alt}
           />
@@ -167,7 +171,7 @@ function App() {
         </div>
         <div className="suggestionContainer">
           <img
-            className={chosenPicture == "3" ? "imageChosen" : "img"}
+            className={chosenPicture === "3" ? "imageChosen" : "img"}
             src={imageLink3}
             alt={alt}
           />
@@ -177,7 +181,7 @@ function App() {
         </div>
         <div className="suggestionContainer">
           <img
-            className={chosenPicture == "4" ? "imageChosen" : "img"}
+            className={chosenPicture === "4" ? "imageChosen" : "img"}
             src={imageLink4}
             alt={alt}
           />
