@@ -11,7 +11,7 @@ import AiNft from "./utils/AiNft.json"
 import "./App.css"
 import { ethers } from "ethers"
 
-import { connectToContract } from "./components/HelpingFunctions"
+import { connectToContract, setupEventListener } from "./components/HelpingFunctions"
 
 const openAIKey = import.meta.env.VITE_OPENAI_API_KEY
 const CONTRACT_ADDRESS_AINFT = "0x299bc06715DaBadb915085522daeFc5b8627539C"
@@ -33,18 +33,11 @@ function App() {
 
     // todo: State zusammenfassen und ein Array machen für links und Base64(??)
 
-    const [imageLink1, setimageLink1] = useState(
-        "https://i.seadn.io/gcs/files/45aefae563f35937711b6a95f70110e6.png?auto=format&w=1000"
-    )
-    const [imageLink2, setimageLink2] = useState(
-        "https://i.seadn.io/gcs/files/1089ca3f2fe5e9c4f32537077ee8feb0.png?auto=format&w=1000"
-    )
-    const [imageLink3, setimageLink3] = useState(
-        "https://i.seadn.io/gcs/files/45aefae563f35937711b6a95f70110e6.png?auto=format&w=1000"
-    )
-    const [imageLink4, setimageLink4] = useState(
-        "https://i.seadn.io/gcs/files/218f18093f45e60231106fb97221d63c.png?auto=format&w=1000"
-    )
+    const [imageLink1, setimageLink1] = useState("../src/assets/questionmark1.png")
+    const [imageLink2, setimageLink2] = useState("../src/assets/questionmark2.png")
+    const [imageLink3, setimageLink3] = useState("../src/assets/questionmark3.png")
+    const [imageLink4, setimageLink4] = useState("../src/assets/questionmark4.png")
+    const [imagesGenerated, setImagesGenerated] = useState(false)
     const [base64_1, setBase64_1] = useState("")
     const [base64_2, setBase64_2] = useState("")
     const [base64_3, setBase64_3] = useState("")
@@ -54,6 +47,7 @@ function App() {
     const [chosenPicture, setChosenPicture] = useState("")
     const [currentAccount, setCurrentAccount] = useState("")
     const [onGoerli, setOnGoerli] = useState(false)
+    const [eventListener, setEventListener] = useState(false)
     let optionsArray = [
         { name: "cat", clicked: false },
         { name: "dog", clicked: false },
@@ -97,6 +91,7 @@ function App() {
         setBase64_4(response.data.data[3].b64_json)
 
         console.log(stringPrompt)
+        setImagesGenerated(true)
     }
 
     const setChosenImage = (chosenBase64, imageId) => {
@@ -110,7 +105,9 @@ function App() {
         if (!ethereum) {
             console.log("Make sure you have metamask!")
             return
-        } else {
+        } else if (!eventListener) {
+            setupEventListener(aiNftContract, AiNft.abi, "NewAiNftMinted")
+            setEventListener(true)
             // console.log("We have the ethereum object", ethereum)
         }
         const accounts = await ethereum.request({ method: "eth_accounts" })
@@ -141,6 +138,10 @@ function App() {
             const accounts = await ethereum.request({ method: "eth_requestAccounts" })
             console.log("Connected ", accounts[0])
             setCurrentAccount(accounts[0])
+            if (!eventListener) {
+                setupEventListener(aiNftContract, AiNft.abi, "NewAiNftMinted")
+                setEventListener(true)
+            }
         } catch (error) {
             console.log(error)
         }
@@ -220,7 +221,9 @@ function App() {
                         src={imageLink1}
                         alt={alt}
                     />
-                    <button onClick={() => setChosenImage(base64_1, "1")}>Choose Nr.1</button>
+                    {imagesGenerated && (
+                        <button onClick={() => setChosenImage(base64_1, "1")}>Choose Nr.1</button>
+                    )}
                 </div>
                 <div className="suggestionContainer">
                     <img
@@ -228,7 +231,9 @@ function App() {
                         src={imageLink2}
                         alt={alt}
                     />
-                    <button onClick={() => setChosenImage(base64_2, "2")}>Choose Nr.2</button>
+                    {imagesGenerated && (
+                        <button onClick={() => setChosenImage(base64_2, "2")}>Choose Nr.2</button>
+                    )}
                 </div>
                 <div className="suggestionContainer">
                     <img
@@ -236,7 +241,9 @@ function App() {
                         src={imageLink3}
                         alt={alt}
                     />
-                    <button onClick={() => setChosenImage(base64_3, "3")}>Choose Nr.3</button>
+                    {imagesGenerated && (
+                        <button onClick={() => setChosenImage(base64_3, "3")}>Choose Nr.3</button>
+                    )}
                 </div>
                 <div className="suggestionContainer">
                     <img
@@ -244,7 +251,9 @@ function App() {
                         src={imageLink4}
                         alt={alt}
                     />
-                    <button onClick={() => setChosenImage(base64_4, "4")}>Choose Nr.4</button>
+                    {imagesGenerated && (
+                        <button onClick={() => setChosenImage(base64_4, "4")}>Choose Nr.4</button>
+                    )}
                 </div>
             </div>
             <button onClick={() => mint()}>Mint Choice</button>
