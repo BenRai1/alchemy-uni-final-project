@@ -149,16 +149,22 @@ function App() {
     const mint = async () => {
         // transforme the base64 data to data readable for to ipfs api
         let imageLink
+        let cidMetadata
         const buffer = Buffer.from(chosenBase64, "base64")
+
+        //upload chosen image to IPFS
 
         ipfs.add(buffer).then((result) => {
             imageLink = `https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${result.path}`
             // imageLink = "https://final-project-au.infura-ipfs.io/ipfs/QmRuiAezX2vuGTG5mRbYwkxUFY5kHk2NYewFUNs1B6mWVG"
             console.log("image Link :", imageLink)
             const metadata = createMetadata(imageLink, 1)
-            ipfs.add(metadata).then((result) => {
+            ipfs.add(metadata).then(async (result) => {
                 const linkToMetatdata = `https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${result.path}`
                 console.log("Link to metadata: ", linkToMetatdata)
+                cidMetadata = result.path
+                const newTxn = await aiNftContract.safeMint(cidMetadata)
+                console.log("Response minting", newTxn)
             })
         })
 
@@ -166,9 +172,10 @@ function App() {
     }
 
     const getInfo = async () => {
-        // await aiNftContract.setTotalSupply(4)
-        const max = await aiNftContract.max_supply()
-        console.log("max", max)
+        await aiNftContract.setTotalSupply(100).then(async () => {
+            const max = await aiNftContract.max_supply()
+            console.log("max", max)
+        })
     }
 
     useEffect(() => {
