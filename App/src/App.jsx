@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react"
 import { Configuration, OpenAIApi } from "openai"
 import { Option } from "./components/Option"
+import { OptionDropdown } from "./components/OptionsDropdown"
 import { Buffer } from "buffer"
 import base64Example from "./components/base64"
 import ipfs from "./components/ipfs"
 import createMetadata from "./components/CreatMetadata"
-import { Button } from "@chakra-ui/react"
-
+import { Button, Select } from "@chakra-ui/react"
 import AiNft from "./utils/AiNft.json"
 import "./App.css"
 import { ethers } from "ethers"
@@ -48,57 +48,20 @@ function App() {
     const [currentAccount, setCurrentAccount] = useState("")
     const [onGoerli, setOnGoerli] = useState(false)
     const [eventListener, setEventListener] = useState(false)
-    let optionsArray = [
-        { name: "cat", clicked: false },
-        { name: "dog", clicked: false },
-        { name: "eagle", clicked: false },
-        { name: "made out of fire", clicked: false },
-        { name: "made out of wather", clicked: false },
-        { name: "made out of lightining", clicked: false },
+    const [selectionNotOk, setSelectionNotOk] = useState(false)
+    let options1 = [
+        { value: "cat", name: "Cat" },
+        { value: "dog", name: "Dog" },
+        { value: "eagle", name: "Eagle" },
+        { value: "wolf", name: "Wolf" },
     ]
-
+    let options2 = [
+        { value: "water", name: "Water" },
+        { value: "fire", name: "Fire" },
+        { value: "lightning", name: "Lightning" },
+    ]
     const alt =
         "https://t3.ftcdn.net/jpg/01/91/95/30/360_F_191953033_gehQATeDoh5z6PyRDbeKyBZuS83CjMEF.jpg"
-
-    const generateImage = async () => {
-        let prompt = "A realistic photographic close up of a"
-        for (let i = 0; i < optionsArray.length; i++) {
-            if (optionsArray[i].clicked == true) {
-                prompt = prompt + " " + optionsArray[i].name
-            }
-        }
-
-        const stringPrompt = prompt.toString()
-
-        console.log(typeof stringPrompt)
-
-        const response = await openai.createImage({
-            prompt: stringPrompt,
-            n: 4,
-            size: "1024x1024",
-            response_format: "b64_json",
-        })
-        console.log(response)
-
-        setimageLink1("data:image/png;base64," + response.data.data[0].b64_json)
-        setimageLink2("data:image/png;base64," + response.data.data[1].b64_json)
-        setimageLink3("data:image/png;base64," + response.data.data[2].b64_json)
-        setimageLink4("data:image/png;base64," + response.data.data[3].b64_json)
-
-        setBase64_1(response.data.data[0].b64_json)
-        setBase64_2(response.data.data[1].b64_json)
-        setBase64_3(response.data.data[2].b64_json)
-        setBase64_4(response.data.data[3].b64_json)
-
-        console.log(stringPrompt)
-        setImagesGenerated(true)
-    }
-
-    const setChosenImage = (chosenBase64, imageId) => {
-        setChosenBase64(chosenBase64)
-        setChosenPicture(imageId)
-        console.log(chosenPicture)
-    }
 
     const checkIfWalletIsConnected = async () => {
         const { ethereum } = window
@@ -146,6 +109,50 @@ function App() {
             console.log(error)
         }
     }
+    const generateImage = async () => {
+        const value1 = document.getElementById("option1").value
+        const value2 = document.getElementById("option2").value
+
+        if (value1 == "" || value2 == "") {
+            setSelectionNotOk(true)
+        } else {
+            setSelectionNotOk(false)
+            const prompt = `A realistic photographic close up of a ${value1} made out of ${value2} `
+            console.log("type of ", typeof prompt)
+            console.log("prompt", prompt)
+
+            const stringPrompt = prompt.toString()
+
+            console.log(typeof stringPrompt)
+
+            const response = await openai.createImage({
+                prompt: stringPrompt,
+                n: 4,
+                size: "1024x1024",
+                response_format: "b64_json",
+            })
+            console.log(response)
+
+            setimageLink1("data:image/png;base64," + response.data.data[0].b64_json)
+            setimageLink2("data:image/png;base64," + response.data.data[1].b64_json)
+            setimageLink3("data:image/png;base64," + response.data.data[2].b64_json)
+            setimageLink4("data:image/png;base64," + response.data.data[3].b64_json)
+
+            setBase64_1(response.data.data[0].b64_json)
+            setBase64_2(response.data.data[1].b64_json)
+            setBase64_3(response.data.data[2].b64_json)
+            setBase64_4(response.data.data[3].b64_json)
+
+            console.log(stringPrompt)
+            setImagesGenerated(true)
+        }
+    }
+
+    const setChosenImage = (chosenBase64, imageId) => {
+        setChosenBase64(chosenBase64)
+        setChosenPicture(imageId)
+        console.log(chosenPicture)
+    }
 
     const mint = async () => {
         // transforme the base64 data to data readable for to ipfs api
@@ -172,11 +179,19 @@ function App() {
         // console.log(`https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${metadataCid}`)
     }
 
-    const getInfo = async () => {
-        await aiNftContract.setTotalSupply(100).then(async () => {
-            const max = await aiNftContract.max_supply()
-            console.log("max", max)
-        })
+    const printValues = () => {
+        const value1 = document.getElementById("option1").value
+        const value2 = document.getElementById("option2").value
+
+        if (value1 == "" || value2 == "") {
+            setSelectionNotOk(true)
+        } else {
+            setSelectionNotOk(false)
+
+            const prompt = `A realistic photographic close up of a ${value1} made out of ${value2} `
+            console.log("type of ", typeof prompt)
+            console.log("prompt", prompt)
+        }
     }
 
     useEffect(() => {
@@ -194,23 +209,25 @@ function App() {
             ) : (
                 <div>
                     <Button colorScheme="blue">Wallet is connected</Button>
-                    <Button colorScheme="blue" onClick={getInfo}>
-                        Get Info
-                    </Button>
                 </div>
             )}
-            <h1>Final project</h1>
+            <h1>Let AI generate an NFT for you that you like</h1>
             <h2>Chose up to 4 attributes</h2>
             <div className="checkboxesContainer">
-                {optionsArray.map((op, index) => {
-                    return (
-                        <div key={index} className="checkbox">
-                            <Option name={op.name} index={index} optionsArray={optionsArray} />
-                        </div>
-                    )
-                })}
+                <OptionDropdown
+                    optionsArray={options1}
+                    placeholder="Select an animal"
+                    id="option1"
+                />
+                <OptionDropdown
+                    optionsArray={options2}
+                    placeholder="Select an element"
+                    id="option2"
+                />
             </div>
+            <div>{selectionNotOk && "Choose an option for each of the menues"}</div>
             <div className="card">
+                <button onClick={printValues}>Print values</button>
                 <button onClick={generateImage}>Generate Image</button>
             </div>
             <div className="suggestionsContainer">
