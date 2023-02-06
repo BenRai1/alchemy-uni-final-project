@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react"
 import { Configuration, OpenAIApi } from "openai"
 import { Option } from "./components/Option"
+import { OptionDropdown } from "./components/OptionsDropdown"
 import { Buffer } from "buffer"
 import base64Example from "./components/base64"
 import ipfs from "./components/ipfs"
 import createMetadata from "./components/CreatMetadata"
-import { Button } from "@chakra-ui/react"
-
+import { Button, Select } from "@chakra-ui/react"
 import AiNft from "./utils/AiNft.json"
 import "./App.css"
 import { ethers } from "ethers"
@@ -48,57 +48,25 @@ function App() {
     const [currentAccount, setCurrentAccount] = useState("")
     const [onGoerli, setOnGoerli] = useState(false)
     const [eventListener, setEventListener] = useState(false)
-    let optionsArray = [
-        { name: "cat", clicked: false },
-        { name: "dog", clicked: false },
-        { name: "eagle", clicked: false },
-        { name: "made out of fire", clicked: false },
-        { name: "made out of wather", clicked: false },
-        { name: "made out of lightining", clicked: false },
+    const [selectionNotOk, setSelectionNotOk] = useState(false)
+    let options1 = [
+        { value: "cat", name: "Cat" },
+        { value: "dog", name: "Dog" },
+        { value: "eagle", name: "Eagle" },
+        { value: "wolf", name: "Wolf" },
+        { value: "lion", name: "Lion" },
+        { value: "elefant", name: "Elefant" },
+        { value: "tiger", name: "Tiger" },
     ]
-
+    let options2 = [
+        { value: "water", name: "Water" },
+        { value: "fire", name: "Fire" },
+        { value: "lightning", name: "Lightning" },
+        { value: "wind", name: "Wind" },
+        { value: "earth", name: "Earth" },
+    ]
     const alt =
         "https://t3.ftcdn.net/jpg/01/91/95/30/360_F_191953033_gehQATeDoh5z6PyRDbeKyBZuS83CjMEF.jpg"
-
-    const generateImage = async () => {
-        let prompt = "A realistic photographic close up of a"
-        for (let i = 0; i < optionsArray.length; i++) {
-            if (optionsArray[i].clicked == true) {
-                prompt = prompt + " " + optionsArray[i].name
-            }
-        }
-
-        const stringPrompt = prompt.toString()
-
-        console.log(typeof stringPrompt)
-
-        const response = await openai.createImage({
-            prompt: stringPrompt,
-            n: 4,
-            size: "1024x1024",
-            response_format: "b64_json",
-        })
-        console.log(response)
-
-        setimageLink1("data:image/png;base64," + response.data.data[0].b64_json)
-        setimageLink2("data:image/png;base64," + response.data.data[1].b64_json)
-        setimageLink3("data:image/png;base64," + response.data.data[2].b64_json)
-        setimageLink4("data:image/png;base64," + response.data.data[3].b64_json)
-
-        setBase64_1(response.data.data[0].b64_json)
-        setBase64_2(response.data.data[1].b64_json)
-        setBase64_3(response.data.data[2].b64_json)
-        setBase64_4(response.data.data[3].b64_json)
-
-        console.log(stringPrompt)
-        setImagesGenerated(true)
-    }
-
-    const setChosenImage = (chosenBase64, imageId) => {
-        setChosenBase64(chosenBase64)
-        setChosenPicture(imageId)
-        console.log(chosenPicture)
-    }
 
     const checkIfWalletIsConnected = async () => {
         const { ethereum } = window
@@ -146,6 +114,46 @@ function App() {
             console.log(error)
         }
     }
+    const generateImage = async () => {
+        const value1 = document.getElementById("option1").value
+        const value2 = document.getElementById("option2").value
+
+        if (value1 == "" || value2 == "") {
+            setSelectionNotOk(true)
+        } else {
+            setSelectionNotOk(false)
+            const prompt = `A realistic photographic close up of a ${value1} made out of ${value2} `
+
+            // const stringPrompt = prompt.toString()
+
+            const response = await openai.createImage({
+                prompt: prompt,
+                n: 4,
+                size: "1024x1024",
+                response_format: "b64_json",
+            })
+            // console.log(response)
+
+            setimageLink1("data:image/png;base64," + response.data.data[0].b64_json)
+            setimageLink2("data:image/png;base64," + response.data.data[1].b64_json)
+            setimageLink3("data:image/png;base64," + response.data.data[2].b64_json)
+            setimageLink4("data:image/png;base64," + response.data.data[3].b64_json)
+
+            setBase64_1(response.data.data[0].b64_json)
+            setBase64_2(response.data.data[1].b64_json)
+            setBase64_3(response.data.data[2].b64_json)
+            setBase64_4(response.data.data[3].b64_json)
+
+            console.log(prompt)
+            setImagesGenerated(true)
+        }
+    }
+
+    const setChosenImage = (chosenBase64, imageId) => {
+        setChosenBase64(chosenBase64)
+        setChosenPicture(imageId)
+        console.log(chosenPicture)
+    }
 
     const mint = async () => {
         // transforme the base64 data to data readable for to ipfs api
@@ -171,12 +179,22 @@ function App() {
 
         // console.log(`https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${metadataCid}`)
     }
+    //-------------------------------- TEST BUTTON --------------------------------------------------------------------
+    const printValues = () => {
+        const button = document.getElementById("mintingButton")
+        // button.setAttribute("isLoading", "false")
+        console.log("Is loading", document.getElementById("mintingButton").isLoading)
+        //     const value1 = document.getElementById("option1").value
+        //     const value2 = document.getElementById("option2").value
 
-    const getInfo = async () => {
-        await aiNftContract.setTotalSupply(100).then(async () => {
-            const max = await aiNftContract.max_supply()
-            console.log("max", max)
-        })
+        //     if (value1 == "" || value2 == "") {
+        //         setSelectionNotOk(true)
+        //     } else {
+        //         setSelectionNotOk(false)
+        //         const prompt = `A realistic photographic close up of a ${value1} made out of ${value2} `
+        //         console.log("type of ", typeof prompt)
+        //         console.log("prompt", prompt)
+        //     }
     }
 
     useEffect(() => {
@@ -184,7 +202,7 @@ function App() {
     }, [])
 
     return (
-        <div className="App">
+        <div>
             {currentAccount === "" ? (
                 <Button colorScheme="blue" onClick={connectWallet}>
                     Connect Wallet
@@ -193,70 +211,129 @@ function App() {
                 <div>You are not on the Goerli Testnet, please change the Network</div>
             ) : (
                 <div>
-                    <Button colorScheme="blue">Wallet is connected</Button>
-                    <Button colorScheme="blue" onClick={getInfo}>
-                        Get Info
-                    </Button>
+                    <h1 className="h1">Let AI generate an NFT for you that you like</h1>
+                    {!imagesGenerated ? (
+                        <h2 className="h2">Make your choice for each attribute</h2>
+                    ) : (
+                        <h2 className="h2">Chose the image for your Nft</h2>
+                    )}
+                    {/* <div className="placeHolderAttributesContainer"> */}
+                    {!imagesGenerated && (
+                        <div className="attributesContainer">
+                            <div className="attributeContainer">
+                                <OptionDropdown
+                                    optionsArray={options1}
+                                    placeholder="Select an animal"
+                                    id="option1"
+                                />
+                            </div>
+                            <div className="attributeContainer">
+                                <OptionDropdown
+                                    optionsArray={options2}
+                                    placeholder="Select an element"
+                                    id="option2"
+                                />
+                            </div>
+                        </div>
+                    )}
+                    {/* </div> */}
+                    {!imagesGenerated && (
+                        <div className="error">
+                            {selectionNotOk && "!! Choose an option for each of the attributes !!"}
+                        </div>
+                    )}
+
+                    {!imagesGenerated && (
+                        <div className="generateImageButton">
+                            {/* <Button colorScheme="red" onClick={printValues}>
+                            Print values
+                        </Button> */}
+                            <Button colorScheme="blackAlpha" onClick={generateImage}>
+                                Generate Image
+                            </Button>
+                        </div>
+                    )}
+
+                    <div className="suggestionsContainer">
+                        <div className="suggestionContainer">
+                            <img
+                                id="image1"
+                                onClick={() => setChosenImage(base64_1, "1")}
+                                className={chosenPicture === "1" ? "imageChosen" : "image"}
+                                src={imageLink1}
+                                alt={alt}
+                            />
+                            {/* {imagesGenerated && (
+                                <Button
+                                    colorScheme="teal"
+                                    onClick={() => setChosenImage(base64_1, "1")}
+                                >
+                                    Choose Nr.1
+                                </Button>
+                            )} */}
+                        </div>
+                        <div className="suggestionContainer">
+                            <img
+                                onClick={() => setChosenImage(base64_2, "2")}
+                                className={chosenPicture == "2" ? "imageChosen" : "image"}
+                                src={imageLink2}
+                                alt={alt}
+                            />
+                            {/* {imagesGenerated && (
+                                <Button
+                                    colorScheme="teal"
+                                    onClick={() => setChosenImage(base64_2, "2")}
+                                >
+                                    Choose Nr.2
+                                </Button>
+                            )} */}
+                        </div>
+                        <div className="suggestionContainer">
+                            <img
+                                onClick={() => setChosenImage(base64_3, "3")}
+                                className={chosenPicture == "3" ? "imageChosen" : "image"}
+                                src={imageLink3}
+                                alt={alt}
+                            />
+                            {/* {imagesGenerated && (
+                                <Button
+                                    colorScheme="teal"
+                                    onClick={() => setChosenImage(base64_3, "3")}
+                                >
+                                    Choose Nr.3
+                                </Button>
+                            )} */}
+                        </div>
+                        <div className="suggestionContainer">
+                            <img
+                                onClick={() => setChosenImage(base64_4, "4")}
+                                className={chosenPicture == "4" ? "imageChosen" : "image"}
+                                src={imageLink4}
+                                alt={alt}
+                            />
+                            {/* {imagesGenerated && (
+                                <Button
+                                    colorScheme="teal"
+                                    onClick={() => setChosenImage(base64_4, "4")}
+                                >
+                                    Choose Nr.4
+                                </Button>
+                            )} */}
+                        </div>
+                    </div>
+                    {imagesGenerated && (
+                        <div className="mintButton">
+                            <Button
+                                id="mintingButton"
+                                colorScheme="blackAlpha"
+                                onClick={() => mint()}
+                            >
+                                Mint Choice
+                            </Button>
+                        </div>
+                    )}
                 </div>
             )}
-            <h1>Final project</h1>
-            <h2>Chose up to 4 attributes</h2>
-            <div className="checkboxesContainer">
-                {optionsArray.map((op, index) => {
-                    return (
-                        <div key={index} className="checkbox">
-                            <Option name={op.name} index={index} optionsArray={optionsArray} />
-                        </div>
-                    )
-                })}
-            </div>
-            <div className="card">
-                <button onClick={generateImage}>Generate Image</button>
-            </div>
-            <div className="suggestionsContainer">
-                <div className="suggestionContainer">
-                    <img
-                        id="image1"
-                        className={chosenPicture === "1" ? "imageChosen" : "img"}
-                        src={imageLink1}
-                        alt={alt}
-                    />
-                    {imagesGenerated && (
-                        <button onClick={() => setChosenImage(base64_1, "1")}>Choose Nr.1</button>
-                    )}
-                </div>
-                <div className="suggestionContainer">
-                    <img
-                        className={chosenPicture == "2" ? "imageChosen" : "img"}
-                        src={imageLink2}
-                        alt={alt}
-                    />
-                    {imagesGenerated && (
-                        <button onClick={() => setChosenImage(base64_2, "2")}>Choose Nr.2</button>
-                    )}
-                </div>
-                <div className="suggestionContainer">
-                    <img
-                        className={chosenPicture == "3" ? "imageChosen" : "img"}
-                        src={imageLink3}
-                        alt={alt}
-                    />
-                    {imagesGenerated && (
-                        <button onClick={() => setChosenImage(base64_3, "3")}>Choose Nr.3</button>
-                    )}
-                </div>
-                <div className="suggestionContainer">
-                    <img
-                        className={chosenPicture == "4" ? "imageChosen" : "img"}
-                        src={imageLink4}
-                        alt={alt}
-                    />
-                    {imagesGenerated && (
-                        <button onClick={() => setChosenImage(base64_4, "4")}>Choose Nr.4</button>
-                    )}
-                </div>
-            </div>
-            <button onClick={() => mint()}>Mint Choice</button>
         </div>
     )
 }

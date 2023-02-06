@@ -1,15 +1,97 @@
 #root {
-    max-width: 1280px;
+    /* border: 1px solid black; */
+    /* max-width: 1280px; */
     margin: 0 auto;
     padding: 2rem;
     text-align: center;
+    width: 100%;
+    background-color: gray;
+
+    /* min-height: 1200px;
+    background-image: url("../src/assets/background_big.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed; */
+}
+.h1 {
+    /* border: 1px solid black; */
+    font-size: 3.5rem;
+    font-weight: bold;
 }
 
-.header {
-    border: 1px solid black;
-    display: flex;
-    justify-content: right;
+.h2 {
+    font-size: 2rem;
+    /* border: 1px solid black; */
 }
+
+/* ------ Attributes -----------  */
+
+.placeHolderAttributesContainer {
+    height: 3.5rem;
+}
+
+.attributesContainer {
+    /* border: 1px solid black; */
+    display: flex;
+    justify-content: center;
+}
+
+.attributeContainer {
+    /* border: 1px solid black; */
+    padding: 0.5rem;
+    width: 25%;
+    min-width: 12rem;
+}
+
+.error {
+    color: red;
+    font-weight: bold;
+    min-height: 2rem;
+    /* border: 1px solid black; */
+}
+
+/* ------ Suggestions NFT image -----------  */
+
+.suggestionsContainer {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    /* border: 1px solid red; */
+}
+
+.suggestionContainer {
+    padding: 0.5rem;
+    display: flex;
+    width: 25%;
+    flex-direction: column;
+    /* background: white; */
+}
+
+.image {
+    border-radius: 1rem;
+    margin-bottom: 1rem;
+}
+
+.mintButton {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border: 10px solid bold;
+    padding: 1rem;
+    /* background-color: green; */
+}
+
+.imageChosen {
+    border: 5px solid blue;
+    border-radius: 1rem;
+    margin-bottom: 1rem;
+}
+
+.img {
+    height: 8em;
+    padding: 1.5em;
+}
+
 /* img {
     height: 6em;
     padding: 1.5em;
@@ -22,40 +104,10 @@ img.react:hover {
     filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
-.card {
-    padding: 2em;
-}
-
-.read-the-docs {
-    color: #888;
-}
-.suggestionsContainer {
-    display: flex;
-}
-
-.suggestionContainer {
+.generateImageButton {
+    /* border: black solid 1px; */
     display: flex;
     flex-direction: column;
-    background: white;
-}
-
-.imageChosen {
-    border: 10px solid bold;
-    height: 6em;
-    padding: 1.5em;
-}
-
-.img {
-    height: 6em;
-    padding: 1.5em;
-}
-.checkboxesContainer {
-    display: flex;
-    grid-template-rows: repeat(2, minmax(0, 1fr));
+    padding: 1em 5rem;
     width: 100%;
-    /* border: red solid 1px; */
-}
-
-.checkbox {
-    width: 8em;
 }
