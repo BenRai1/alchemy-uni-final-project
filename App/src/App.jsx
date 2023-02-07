@@ -119,7 +119,6 @@ function App() {
     }
 
     const generateImage = async () => {
-        setGeneratingImages(true)
         const value1 = document.getElementById("option1").value
         setPrompt1(value1)
         const value2 = document.getElementById("option2").value
@@ -128,6 +127,7 @@ function App() {
         if (value1 == "" || value2 == "") {
             setSelectionNotOk(true)
         } else {
+            setGeneratingImages(true)
             setSelectionNotOk(false)
             const prompt = `A realistic photographic close up of a ${value1} made out of ${value2} `
             console.log(prompt)
@@ -158,9 +158,11 @@ function App() {
     }
 
     const setChosenImage = (chosenBase64, imageId) => {
-        setChosenBase64(chosenBase64)
-        setChosenPicture(imageId)
-        console.log(chosenPicture)
+        if (imagesGenerated) {
+            setChosenBase64(chosenBase64)
+            setChosenPicture(imageId)
+            console.log(chosenPicture)
+        }
     }
 
     const mint = async () => {
@@ -187,9 +189,10 @@ function App() {
                     const linkToMetatdata = `https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${result.path}`
                     console.log("Link to metadata: ", linkToMetatdata)
                     cidMetadata = result.path
-                    let newTxn = await aiNftContract.safeMint(cidMetadata)
-                    console.log("Response minting", newTxn)
-                    newTxn = await aiNftContract.getNumberOfNftsMinted(currentAccount)
+                    const mintTxn = await aiNftContract.safeMint(cidMetadata)
+                    await mintTxn.wait()
+                    console.log("Response minting", mintTxn)
+                    const newTxn = await aiNftContract.getNumberOfNftsMinted(currentAccount)
                     const walletMinted = parseInt(newTxn._hex, 16)
                     setAlreadyMinted(walletMinted)
                     setMintingNft(false)
@@ -299,9 +302,6 @@ function App() {
 
                             {!imagesGenerated && (
                                 <div className="generateImageButton">
-                                    <Button colorScheme="red" onClick={printValues}>
-                                        Print values
-                                    </Button>
                                     <Button colorScheme="blackAlpha" onClick={generateImage}>
                                         {gneratingImages ? (
                                             <div className="progressButton">
@@ -322,7 +322,13 @@ function App() {
                                     <img
                                         id="image1"
                                         onClick={() => setChosenImage(base64_1, "1")}
-                                        className={chosenPicture === "1" ? "imageChosen" : "image"}
+                                        className={
+                                            chosenPicture === "1"
+                                                ? "imageChosen"
+                                                : imagesGenerated
+                                                ? "image"
+                                                : "noHover"
+                                        }
                                         src={imageLink1}
                                         alt={alt}
                                     />
@@ -330,7 +336,13 @@ function App() {
                                 <div className="suggestionContainer">
                                     <img
                                         onClick={() => setChosenImage(base64_2, "2")}
-                                        className={chosenPicture == "2" ? "imageChosen" : "image"}
+                                        className={
+                                            chosenPicture === "2"
+                                                ? "imageChosen"
+                                                : imagesGenerated
+                                                ? "image"
+                                                : "noHover"
+                                        }
                                         src={imageLink2}
                                         alt={alt}
                                     />
@@ -338,7 +350,13 @@ function App() {
                                 <div className="suggestionContainer">
                                     <img
                                         onClick={() => setChosenImage(base64_3, "3")}
-                                        className={chosenPicture == "3" ? "imageChosen" : "image"}
+                                        className={
+                                            chosenPicture === "3"
+                                                ? "imageChosen"
+                                                : imagesGenerated
+                                                ? "image"
+                                                : "noHover"
+                                        }
                                         src={imageLink3}
                                         alt={alt}
                                     />
@@ -346,7 +364,13 @@ function App() {
                                 <div className="suggestionContainer">
                                     <img
                                         onClick={() => setChosenImage(base64_4, "4")}
-                                        className={chosenPicture == "4" ? "imageChosen" : "image"}
+                                        className={
+                                            chosenPicture === "4"
+                                                ? "imageChosen"
+                                                : imagesGenerated
+                                                ? "image"
+                                                : "noHover"
+                                        }
                                         src={imageLink4}
                                         alt={alt}
                                     />
@@ -372,9 +396,9 @@ function App() {
                                             </div>
                                         )}
                                     </Button>
-                                    <Button colorScheme="red" onClick={printValues}>
+                                    {/* <Button colorScheme="red" onClick={printValues}>
                                         Print values
-                                    </Button>
+                                    </Button> */}
                                 </div>
                             )}
                         </div>
@@ -382,18 +406,19 @@ function App() {
                 </div>
             )}
             {alreadyMinted > 0 && (
-                <div>
-                    <div>Here are the NFTs you already minted and the link to the collection</div>
+                <div className="mintedContainer">
+                    <h2 className="h2">Here are the NFTs of the collection you own </h2>
 
+                    <div className="ownedNfts">
+                        {nftsOwned.map((nft) => {
+                            return ownedNft(nft, baseURL)
+                        })}
+                    </div>
                     <a
                         href="https://testnets.opensea.io/collection/ainft-gmiamamfbl"
                         target="_blank"
+                        className="link"
                     >
-                        <div className="ownedNfts">
-                            {nftsOwned.map((nft) => {
-                                return ownedNft(nft, baseURL)
-                            })}
-                        </div>
                         Go to the Collection
                     </a>
                 </div>

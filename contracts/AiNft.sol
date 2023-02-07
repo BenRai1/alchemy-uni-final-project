@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 
 //uri(Linkt to Metadata): https://final-project-au.infura-ipfs.io/ipfs/QmbDLofw6tv5j5xMwJsY99x5UxFMMyKrrSrGm8CZVyBJYM
-// deployed to: 0x299bc06715DaBadb915085522daeFc5b8627539C
+// deployed to: 0x9e9b71520A0a67A0853c987cE14925F20B531D2f
 
 contract AiNft is ERC721, ERC721URIStorage, Pausable, Ownable {
     using Counters for Counters.Counter;

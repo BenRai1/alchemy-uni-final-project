@@ -11,5 +11,3 @@ const ownedNft = (nft, baseURL) => {
 }
 
 export default ownedNft
-
-// export nft to this fiel
