@@ -22,17 +22,17 @@ https://github.com/BenRai1/alchemy-uni-final-project.git
 Set up the .env file for the smartcontract with the following data:
 (Make sure the variables are called the same)
 
-ALCHEMY_GOERLI_RPC_URL => make an account and get it at https://www.alchemy.com/
-GOERLI_PRIVATE_KEY => the private Key of the Etherium account you want to use
-ETHERSCAN_API_KEY => make an account and get it at https://goerli.etherscan.io/
+- ALCHEMY_GOERLI_RPC_URL => make an account and get it at https://www.alchemy.com/
+- GOERLI_PRIVATE_KEY => the private Key of the Etherium account you want to use
+- ETHERSCAN_API_KEY => make an account and get it at https://goerli.etherscan.io/
 
 Set up the .env file for the App (./App/.env) with the following data:
 (Make sure the variables are called the same)
 
-VITE_OPENAI_API_KEY => make an account and get it at https://www.infura.io/
-VITE_INFURA_PORJECT_ID => make an account and get it at https://www.infura.io/
-VITE_INFURA_API_KEY_SECRET => make an account and get it at https://www.infura.io/
-VITE_ALCHEMY_API_KEY => make an account and get it at https://www.alchemy.com/
+- VITE_OPENAI_API_KEY => make an account and get it at https://www.infura.io/
+- VITE_INFURA_PORJECT_ID => make an account and get it at https://www.infura.io/
+- VITE_INFURA_API_KEY_SECRET => make an account and get it at https://www.infura.io/
+- VITE_ALCHEMY_API_KEY => make an account and get it at https://www.alchemy.com/
 
 Once you are done do the following:
 
