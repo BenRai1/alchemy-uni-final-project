@@ -1,20 +1,18 @@
 import { useState, useEffect } from "react"
 import { Configuration, OpenAIApi } from "openai"
-import { Option } from "./components/Option"
 import { OptionDropdown } from "./components/OptionsDropdown"
 import { Buffer } from "buffer"
 import base64Example from "./components/base64"
 import ipfs from "./components/ipfs"
 import createMetadata from "./components/CreatMetadata"
-import { Button, Select } from "@chakra-ui/react"
+import { Button, Spinner } from "@chakra-ui/react"
 import AiNft from "./utils/AiNft.json"
 import "./App.css"
-import { ethers } from "ethers"
 
 import { connectToContract, setupEventListener } from "./components/HelpingFunctions"
 
 const openAIKey = import.meta.env.VITE_OPENAI_API_KEY
-const CONTRACT_ADDRESS_AINFT = "0x299bc06715DaBadb915085522daeFc5b8627539C"
+const CONTRACT_ADDRESS_AINFT = "0x9e9b71520A0a67A0853c987cE14925F20B531D2f"
 const aiNftContract = connectToContract(CONTRACT_ADDRESS_AINFT, AiNft.abi)
 
 // https://ipfs.infura.io/ipfs/QmNkGQWQo7oxKUUpTvse9rEjzrjdWDAQMqzAmfRTGjSXCZ
@@ -33,6 +31,11 @@ function App() {
 
     // todo: State zusammenfassen und ein Array machen für links und Base64(??)
 
+    const [maxMints, setMaxMints] = useState("?")
+    const [alreadyMinted, setAlreadyMinted] = useState("?")
+    const [prompt1, setPrompt1] = useState("")
+    const [prompt2, setPrompt2] = useState("")
+
     const [imageLink1, setimageLink1] = useState("../src/assets/questionmark1.png")
     const [imageLink2, setimageLink2] = useState("../src/assets/questionmark2.png")
     const [imageLink3, setimageLink3] = useState("../src/assets/questionmark3.png")
@@ -49,6 +52,8 @@ function App() {
     const [onGoerli, setOnGoerli] = useState(false)
     const [eventListener, setEventListener] = useState(false)
     const [selectionNotOk, setSelectionNotOk] = useState(false)
+    const [mintingNft, setMintingNft] = useState(false)
+    const [gneratingImages, setGeneratingImages] = useState(false)
     let options1 = [
         { value: "cat", name: "Cat" },
         { value: "dog", name: "Dog" },
@@ -114,15 +119,20 @@ function App() {
             console.log(error)
         }
     }
+
     const generateImage = async () => {
+        setGeneratingImages(true)
         const value1 = document.getElementById("option1").value
+        setPrompt1(value1)
         const value2 = document.getElementById("option2").value
+        setPrompt2(value2)
 
         if (value1 == "" || value2 == "") {
             setSelectionNotOk(true)
         } else {
             setSelectionNotOk(false)
             const prompt = `A realistic photographic close up of a ${value1} made out of ${value2} `
+            console.log(prompt)
 
             // const stringPrompt = prompt.toString()
 
@@ -144,8 +154,8 @@ function App() {
             setBase64_3(response.data.data[2].b64_json)
             setBase64_4(response.data.data[3].b64_json)
 
-            console.log(prompt)
             setImagesGenerated(true)
+            setGeneratingImages(false)
         }
     }
 
@@ -156,50 +166,76 @@ function App() {
     }
 
     const mint = async () => {
-        // transforme the base64 data to data readable for to ipfs api
-        let imageLink
-        let cidMetadata
-        const buffer = Buffer.from(chosenBase64, "base64")
+        if (chosenPicture == "") {
+            alert("Chose an image to mint as an NFT by clicking on it")
+        } else {
+            setMintingNft(true)
+            // transforme the base64 data to data readable for to ipfs api
+            let imageLink
+            let cidMetadata
+            const buffer = Buffer.from(chosenBase64, "base64")
 
-        //upload chosen image to IPFS
+            //upload chosen image to IPFS
 
-        ipfs.add(buffer).then((result) => {
-            imageLink = `https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${result.path}`
-            // imageLink = "https://final-project-au.infura-ipfs.io/ipfs/QmRuiAezX2vuGTG5mRbYwkxUFY5kHk2NYewFUNs1B6mWVG"
-            console.log("image Link :", imageLink)
-            const metadata = createMetadata(imageLink, 1)
-            ipfs.add(metadata).then(async (result) => {
-                const linkToMetatdata = `https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${result.path}`
-                console.log("Link to metadata: ", linkToMetatdata)
-                cidMetadata = result.path
-                const newTxn = await aiNftContract.safeMint(cidMetadata)
-                console.log("Response minting", newTxn)
+            ipfs.add(buffer).then(async (result) => {
+                imageLink = `https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${result.path}`
+                // imageLink = "https://final-project-au.infura-ipfs.io/ipfs/QmRuiAezX2vuGTG5mRbYwkxUFY5kHk2NYewFUNs1B6mWVG"
+                console.log("image Link :", imageLink)
+                const txn = await aiNftContract.getCurrtenAiNftAmoundMinted()
+                const tokenId = parseInt(txn._hex, 16) + 1
+
+                const metadata = createMetadata(imageLink, tokenId, prompt1, prompt2)
+                ipfs.add(metadata).then(async (result) => {
+                    const linkToMetatdata = `https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${result.path}`
+                    console.log("Link to metadata: ", linkToMetatdata)
+                    cidMetadata = result.path
+                    let newTxn = await aiNftContract.safeMint(cidMetadata)
+                    console.log("Response minting", newTxn)
+                    newTxn = await aiNftContract.getNumberOfNftsMinted(currentAccount)
+                    const walletMinted = parseInt(newTxn._hex, 16)
+                    setAlreadyMinted(walletMinted)
+                    setMintingNft(false)
+                    setImagesGenerated(false)
+                    setChosenImage("")
+                    resetImages()
+                })
             })
-        })
 
-        // console.log(`https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${metadataCid}`)
+            // console.log(`https://${dedicatedGatewayInfuria}.infura-ipfs.io/ipfs/${metadataCid}`)
+        }
+    }
+
+    const getInitialData = async () => {
+        if (currentAccount) {
+            let txn = await aiNftContract.MAX_MINT_PER_WALLET()
+            const max = parseInt(txn._hex, 16)
+            setMaxMints(max)
+
+            txn = await aiNftContract.getNumberOfNftsMinted(currentAccount)
+            const walletMinted = parseInt(txn._hex, 16)
+            setAlreadyMinted(walletMinted)
+            console.log(walletMinted)
+        }
+    }
+
+    const resetImages = () => {
+        setimageLink1("../src/assets/questionmark1.png")
+        setimageLink2("../src/assets/questionmark2.png")
+        setimageLink3("../src/assets/questionmark3.png")
+        setimageLink4("../src/assets/questionmark4.png")
     }
     //-------------------------------- TEST BUTTON --------------------------------------------------------------------
     const printValues = () => {
-        const button = document.getElementById("mintingButton")
-        // button.setAttribute("isLoading", "false")
-        console.log("Is loading", document.getElementById("mintingButton").isLoading)
-        //     const value1 = document.getElementById("option1").value
-        //     const value2 = document.getElementById("option2").value
-
-        //     if (value1 == "" || value2 == "") {
-        //         setSelectionNotOk(true)
-        //     } else {
-        //         setSelectionNotOk(false)
-        //         const prompt = `A realistic photographic close up of a ${value1} made out of ${value2} `
-        //         console.log("type of ", typeof prompt)
-        //         console.log("prompt", prompt)
-        //     }
+        console.log(maxMints)
+        console.log(alreadyMinted)
     }
 
     useEffect(() => {
         checkIfWalletIsConnected()
     }, [])
+    useEffect(() => {
+        getInitialData()
+    }, [currentAccount])
 
     return (
         <div>
@@ -212,124 +248,134 @@ function App() {
             ) : (
                 <div>
                     <h1 className="h1">Let AI generate an NFT for you that you like</h1>
-                    {!imagesGenerated ? (
-                        <h2 className="h2">Make your choice for each attribute</h2>
-                    ) : (
-                        <h2 className="h2">Chose the image for your Nft</h2>
-                    )}
-                    {/* <div className="placeHolderAttributesContainer"> */}
-                    {!imagesGenerated && (
-                        <div className="attributesContainer">
-                            <div className="attributeContainer">
-                                <OptionDropdown
-                                    optionsArray={options1}
-                                    placeholder="Select an animal"
-                                    id="option1"
-                                />
+                    {alreadyMinted > 0 && (
+                        <div>
+                            <div>
+                                Here are the NFTs you already minted and the link to the collection
                             </div>
-                            <div className="attributeContainer">
-                                <OptionDropdown
-                                    optionsArray={options2}
-                                    placeholder="Select an element"
-                                    id="option2"
-                                />
-                            </div>
-                        </div>
-                    )}
-                    {/* </div> */}
-                    {!imagesGenerated && (
-                        <div className="error">
-                            {selectionNotOk && "!! Choose an option for each of the attributes !!"}
-                        </div>
-                    )}
 
-                    {!imagesGenerated && (
-                        <div className="generateImageButton">
-                            {/* <Button colorScheme="red" onClick={printValues}>
-                            Print values
-                        </Button> */}
-                            <Button colorScheme="blackAlpha" onClick={generateImage}>
-                                Generate Image
-                            </Button>
-                        </div>
-                    )}
-
-                    <div className="suggestionsContainer">
-                        <div className="suggestionContainer">
-                            <img
-                                id="image1"
-                                onClick={() => setChosenImage(base64_1, "1")}
-                                className={chosenPicture === "1" ? "imageChosen" : "image"}
-                                src={imageLink1}
-                                alt={alt}
-                            />
-                            {/* {imagesGenerated && (
-                                <Button
-                                    colorScheme="teal"
-                                    onClick={() => setChosenImage(base64_1, "1")}
-                                >
-                                    Choose Nr.1
-                                </Button>
-                            )} */}
-                        </div>
-                        <div className="suggestionContainer">
-                            <img
-                                onClick={() => setChosenImage(base64_2, "2")}
-                                className={chosenPicture == "2" ? "imageChosen" : "image"}
-                                src={imageLink2}
-                                alt={alt}
-                            />
-                            {/* {imagesGenerated && (
-                                <Button
-                                    colorScheme="teal"
-                                    onClick={() => setChosenImage(base64_2, "2")}
-                                >
-                                    Choose Nr.2
-                                </Button>
-                            )} */}
-                        </div>
-                        <div className="suggestionContainer">
-                            <img
-                                onClick={() => setChosenImage(base64_3, "3")}
-                                className={chosenPicture == "3" ? "imageChosen" : "image"}
-                                src={imageLink3}
-                                alt={alt}
-                            />
-                            {/* {imagesGenerated && (
-                                <Button
-                                    colorScheme="teal"
-                                    onClick={() => setChosenImage(base64_3, "3")}
-                                >
-                                    Choose Nr.3
-                                </Button>
-                            )} */}
-                        </div>
-                        <div className="suggestionContainer">
-                            <img
-                                onClick={() => setChosenImage(base64_4, "4")}
-                                className={chosenPicture == "4" ? "imageChosen" : "image"}
-                                src={imageLink4}
-                                alt={alt}
-                            />
-                            {/* {imagesGenerated && (
-                                <Button
-                                    colorScheme="teal"
-                                    onClick={() => setChosenImage(base64_4, "4")}
-                                >
-                                    Choose Nr.4
-                                </Button>
-                            )} */}
-                        </div>
-                    </div>
-                    {imagesGenerated && (
-                        <div className="mintButton">
-                            <Button
-                                id="mintingButton"
-                                colorScheme="blackAlpha"
-                                onClick={() => mint()}
+                            <a
+                                href="https://testnets.opensea.io/collection/ainft-gmiamamfbl"
+                                target="_blank"
                             >
-                                Mint Choice
-                            </Button>
+                                Go to the Collection
+                            </a>
+                        </div>
+                    )}
+
+                    {maxMints > alreadyMinted && (
+                        <div>
+                            {!imagesGenerated ? (
+                                <h2 className="h2">Make your choice for each attribute</h2>
+                            ) : (
+                                <h2 className="h2">Chose the image for your Nft</h2>
+                            )}
+                            {!imagesGenerated && (
+                                <div className="attributesContainer">
+                                    <div className="attributeContainer">
+                                        <OptionDropdown
+                                            optionsArray={options1}
+                                            placeholder="Select an animal"
+                                            id="option1"
+                                        />
+                                    </div>
+                                    <div className="attributeContainer">
+                                        <OptionDropdown
+                                            optionsArray={options2}
+                                            placeholder="Select an element"
+                                            id="option2"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {!imagesGenerated && (
+                                <div className="error">
+                                    {selectionNotOk &&
+                                        "!! Choose an option for each of the attributes !!"}
+                                </div>
+                            )}
+
+                            {!imagesGenerated && (
+                                <div className="generateImageButton">
+                                    <Button colorScheme="red" onClick={printValues}>
+                                        Print values
+                                    </Button>
+                                    <Button colorScheme="blackAlpha" onClick={generateImage}>
+                                        {gneratingImages ? (
+                                            <div className="progressButton">
+                                                <Spinner />{" "}
+                                                <div className="textProgressButton">
+                                                    Generating Images
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div>{`Generate Images (${alreadyMinted} / ${maxMints} Nfts already minted)`}</div>
+                                        )}
+                                    </Button>
+                                </div>
+                            )}
+
+                            <div className="suggestionsContainer">
+                                <div className="suggestionContainer">
+                                    <img
+                                        id="image1"
+                                        onClick={() => setChosenImage(base64_1, "1")}
+                                        className={chosenPicture === "1" ? "imageChosen" : "image"}
+                                        src={imageLink1}
+                                        alt={alt}
+                                    />
+                                </div>
+                                <div className="suggestionContainer">
+                                    <img
+                                        onClick={() => setChosenImage(base64_2, "2")}
+                                        className={chosenPicture == "2" ? "imageChosen" : "image"}
+                                        src={imageLink2}
+                                        alt={alt}
+                                    />
+                                </div>
+                                <div className="suggestionContainer">
+                                    <img
+                                        onClick={() => setChosenImage(base64_3, "3")}
+                                        className={chosenPicture == "3" ? "imageChosen" : "image"}
+                                        src={imageLink3}
+                                        alt={alt}
+                                    />
+                                </div>
+                                <div className="suggestionContainer">
+                                    <img
+                                        onClick={() => setChosenImage(base64_4, "4")}
+                                        className={chosenPicture == "4" ? "imageChosen" : "image"}
+                                        src={imageLink4}
+                                        alt={alt}
+                                    />
+                                </div>
+                            </div>
+                            {imagesGenerated && (
+                                <div className="mintButton">
+                                    <Button
+                                        id="mintingButton"
+                                        colorScheme="blackAlpha"
+                                        onClick={() => mint()}
+                                    >
+                                        {mintingNft ? (
+                                            <div className="progressButton">
+                                                <Spinner />{" "}
+                                                <div className="textProgressButton">
+                                                    Minting in Progress
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                {`Mint Choice (${alreadyMinted} / ${maxMints} Nfts already minted)`}
+                                            </div>
+                                        )}
+                                    </Button>
+                                    <Button colorScheme="red" onClick={printValues}>
+                                        Print values
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

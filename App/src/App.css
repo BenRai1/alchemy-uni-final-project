@@ -111,3 +111,12 @@ img.react:hover {
     padding: 1em 5rem;
     width: 100%;
 }
+
+.progressButton {
+    display: flex;
+    justify-content: center;
+}
+
+.textProgressButton {
+    margin-left: 2rem;
+}

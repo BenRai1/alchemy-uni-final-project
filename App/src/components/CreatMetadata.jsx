@@ -1,4 +1,4 @@
-const createMetadata = (imageLink, number) => {
+const createMetadata = (imageLink, number, prompt1, prompt2) => {
     const metaData = JSON.stringify({
         description: "Use your own prompts and AI generated images to creat an NFT you like",
         image: `${imageLink}`,
@@ -6,11 +6,11 @@ const createMetadata = (imageLink, number) => {
         attributes: [
             {
                 trait_type: "Animal",
-                value: "Mutant Ape",
+                value: prompt1,
             },
             {
-                trait_type: "Number",
-                value: "787",
+                trait_type: "Element",
+                value: prompt2,
             },
         ],
     })

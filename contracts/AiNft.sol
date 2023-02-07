@@ -48,6 +48,7 @@ contract AiNft is ERC721, ERC721URIStorage, Pausable, Ownable {
         _safeMint(msg.sender, tokenId);
         _setTokenURI(tokenId, uri);
         numberOfNftsOwned[msg.sender]++;
+        numberNftsMinted[msg.sender]++;
         emit NewAiNftMinted(msg.sender, tokenId);
     }
 
@@ -80,13 +81,20 @@ contract AiNft is ERC721, ERC721URIStorage, Pausable, Ownable {
             max_supply = _newTotalSupply;
         }
 
-
-    function getCurrtenPirateApeNftAmoundMinted() public view returns (uint256) {
+    function getCurrtenAiNftAmoundMinted() public view returns (uint256) {
         return _tokenIdCounter.current();
     }
 
     function getNumberOfAiNftsOwned(address _senderAddress) public view returns (uint256) {
         return numberOfNftsOwned[_senderAddress];
+    }
+
+    function getNumberOfNftsMinted(address _address) public view returns (uint){
+        return numberNftsMinted[_address];
+    }
+
+    function setMaxMintPerWallet(uint _max) public onlyOwner{
+        MAX_MINT_PER_WALLET = _max;
     }
 
 
