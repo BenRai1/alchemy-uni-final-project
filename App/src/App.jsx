@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react"
-import { Configuration, OpenAIApi } from "openai"
 import { OptionDropdown } from "./components/OptionsDropdown"
 import { Buffer } from "buffer"
 import base64Example from "./components/base64"
@@ -8,10 +7,12 @@ import createMetadata from "./components/CreatMetadata"
 import { Button, Spinner } from "@chakra-ui/react"
 import AiNft from "./utils/AiNft.json"
 import "./App.css"
+import alchemy from "./components/Alchemy"
+import openai from "./components/OpenAi"
+import ownedNft from "./components/OwnedNfts"
 
 import { connectToContract, setupEventListener } from "./components/HelpingFunctions"
 
-const openAIKey = import.meta.env.VITE_OPENAI_API_KEY
 const CONTRACT_ADDRESS_AINFT = "0x9e9b71520A0a67A0853c987cE14925F20B531D2f"
 const aiNftContract = connectToContract(CONTRACT_ADDRESS_AINFT, AiNft.abi)
 
@@ -21,13 +22,9 @@ const aiNftContract = connectToContract(CONTRACT_ADDRESS_AINFT, AiNft.abi)
 // https://ipfs.infura.io:5001/api/v0/cat?arg=QmNkGQWQo7oxKUUpTvse9rEjzrjdWDAQMqzAmfRTGjSXCZ
 // https://final-project-au.infura-ipfs.io/ipfs/QmbDLofw6tv5j5xMwJsY99x5UxFMMyKrrSrGm8CZVyBJYM
 
-const configuration = new Configuration({
-    apiKey: openAIKey,
-})
-const openai = new OpenAIApi(configuration)
-
 function App() {
     const dedicatedGatewayInfuria = "final-project-au"
+    const baseURL = `https://testnets.opensea.io/assets/goerli/${CONTRACT_ADDRESS_AINFT}`
 
     // todo: State zusammenfassen und ein Array machen für links und Base64(??)
 
@@ -35,6 +32,7 @@ function App() {
     const [alreadyMinted, setAlreadyMinted] = useState("?")
     const [prompt1, setPrompt1] = useState("")
     const [prompt2, setPrompt2] = useState("")
+    const [nftsOwned, setNftsOwned] = useState([])
 
     const [imageLink1, setimageLink1] = useState("../src/assets/questionmark1.png")
     const [imageLink2, setimageLink2] = useState("../src/assets/questionmark2.png")
@@ -198,6 +196,7 @@ function App() {
                     setImagesGenerated(false)
                     setChosenImage("")
                     resetImages()
+                    getNftsOwned()
                 })
             })
 
@@ -224,10 +223,25 @@ function App() {
         setimageLink3("../src/assets/questionmark3.png")
         setimageLink4("../src/assets/questionmark4.png")
     }
+
+    const getNftsOwned = () => {
+        if (currentAccount) {
+            alchemy.nft
+                .getNftsForOwner(currentAccount, {
+                    contractAddresses: ["0x9e9b71520a0a67a0853c987ce14925f20b531d2f"],
+                })
+                .then((response) => {
+                    setNftsOwned(response.ownedNfts)
+                    console.log(response.ownedNfts[0].media[0].raw)
+                    console.log(response.ownedNfts[0].tokenId)
+                    console.log(response.ownedNfts[0])
+                })
+        }
+    }
+
     //-------------------------------- TEST BUTTON --------------------------------------------------------------------
     const printValues = () => {
-        console.log(maxMints)
-        console.log(alreadyMinted)
+        getNftsOwned()
     }
 
     useEffect(() => {
@@ -235,6 +249,7 @@ function App() {
     }, [])
     useEffect(() => {
         getInitialData()
+        getNftsOwned()
     }, [currentAccount])
 
     return (
@@ -248,20 +263,6 @@ function App() {
             ) : (
                 <div>
                     <h1 className="h1">Let AI generate an NFT for you that you like</h1>
-                    {alreadyMinted > 0 && (
-                        <div>
-                            <div>
-                                Here are the NFTs you already minted and the link to the collection
-                            </div>
-
-                            <a
-                                href="https://testnets.opensea.io/collection/ainft-gmiamamfbl"
-                                target="_blank"
-                            >
-                                Go to the Collection
-                            </a>
-                        </div>
-                    )}
 
                     {maxMints > alreadyMinted && (
                         <div>
@@ -378,6 +379,23 @@ function App() {
                             )}
                         </div>
                     )}
+                </div>
+            )}
+            {alreadyMinted > 0 && (
+                <div>
+                    <div>Here are the NFTs you already minted and the link to the collection</div>
+
+                    <a
+                        href="https://testnets.opensea.io/collection/ainft-gmiamamfbl"
+                        target="_blank"
+                    >
+                        <div className="ownedNfts">
+                            {nftsOwned.map((nft) => {
+                                return ownedNft(nft, baseURL)
+                            })}
+                        </div>
+                        Go to the Collection
+                    </a>
                 </div>
             )}
         </div>

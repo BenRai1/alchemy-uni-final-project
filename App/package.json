@@ -15,6 +15,7 @@
     "@thirdweb-dev/react": "^3.7.4",
     "@thirdweb-dev/sdk": "^3.7.4",
     "@web3uikit/core": "^0.2.45",
+    "alchemy-sdk": "^2.4.2",
     "dotenv": "^16.0.3",
     "ethers": "^5.4.7",
     "framer-motion": "^9.0.1",
