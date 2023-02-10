@@ -1,14 +1,14 @@
 # Minting an NFT where the picture is created by AI (Dall e)
 
-This Project demostrates how AI can be used to generate Pictures and mint them as an NFT.
+This Project demonstrates how AI can be used to generate Pictures and mint them as an NFT.
 
-The prject uses the following tech stack:
+The project uses the following tech stack:
 
 1. Solidity for writing the smart contract and deploying it to the Goerli Testnet
 
 2. Vite, React, HTML, JavaScripot and CSS for the minting website
 
-3. Ethers for connecting the website with the smart contract and interecting with it
+3. Ethers for connecting the website with the smart contract and interacting with it
 
 4. Several APIs:
    - OpenAi API for Dalle to generate the example images for the NFT
@@ -19,11 +19,11 @@ To try it out download the repo from
 
 https://github.com/BenRai1/alchemy-uni-final-project.git
 
-Set up the .env file for the smartcontract with the following data:
+Set up the .env file for the smart contract with the following data:
 (Make sure the variables are called the same)
 
 - ALCHEMY_GOERLI_RPC_URL => make an account and get it at https://www.alchemy.com/
-- GOERLI_PRIVATE_KEY => the private Key of the Etherium account you want to use
+- GOERLI_PRIVATE_KEY => the private Key of the Ethereum account you want to use
 - ETHERSCAN_API_KEY => make an account and get it at https://goerli.etherscan.io/
 
 Set up the .env file for the App (./App/.env) with the following data:
